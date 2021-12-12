@@ -1,0 +1,98 @@
+@startuml
+class elfak.masterrad.queryservice.models.dto.SensorMeasurementDTO {
+- String requestId
+- Double lightIntensity
+- Double groundMoisture
+- Double windIntensity
+- Double soilHumidity
++ String getRequestId()
++ void setRequestId(String)
++ Double getLightIntensity()
++ void setLightIntensity(Double)
++ Double getGroundMoisture()
++ void setGroundMoisture(Double)
++ Double getWindIntensity()
++ void setWindIntensity(Double)
++ Double getSoilHumidity()
++ void setSoilHumidity(Double)
++ String toString()
+}
+class elfak.masterrad.queryservice.controllers.SensorController {
++ ResponseEntity<List<SensorMeasurementDTO>> readSensorMeasurementFromNow(Long)
++ ResponseEntity<List<SensorMeasurementDTO>> readSensorMeasurementBetweenTwoDates(Instant,Instant)
++ ResponseEntity<SensorMeasurementDTO> readLatestMeasurement()
++ ResponseEntity<List<SensorMeasurementDTO>> readSensorMeasurementOverLightIntensityThreshold(Double)
+}
+class elfak.masterrad.queryservice.config.WebSocketConfig {
++ void configureMessageBroker(MessageBrokerRegistry)
++ void registerStompEndpoints(StompEndpointRegistry)
+}
+class elfak.masterrad.queryservice.QueryserviceApplication {
+~ Logger logger
+- String host
+- String username
+- String password
++ {static} void main(String[])
+- void createDbs()
+}
+class elfak.masterrad.queryservice.models.SensorMeasurement {
+- Instant time
+- Double lightIntensity
+- Double groundMoisture
+- Double windIntensity
+- Double soilHumidity
++ Instant getTime()
++ void setTime(Instant)
++ Double getLightIntensity()
++ void setLightIntensity(Double)
++ Double getGroundMoisture()
++ void setGroundMoisture(Double)
++ Double getWindIntensity()
++ void setWindIntensity(Double)
++ Double getSoilHumidity()
++ void setSoilHumidity(Double)
++ String toString()
+}
+class elfak.masterrad.queryservice.services.impl.SensorServiceImpl {
+- String host
+- String username
+- String password
+~ SimpMessagingTemplate template
+- Logger logger
++ SensorMeasurementDTO storeMeasurement(SensorMeasurementDTO)
++ SensorMeasurementDTO readLatestSensorMeasurement()
++ List<SensorMeasurementDTO> readSensorMeasurementsInBetweenDates(Instant,Instant)
++ List<SensorMeasurementDTO> readSensorMeasurementsInTheLastMinutes(Long)
++ List<SensorMeasurementDTO> readSensorMeasurementOverLightIntensityThreshold(Double)
+- SensorMeasurementDTO mapPOJOToDTO(SensorMeasurement)
+- List<SensorMeasurementDTO> mapPOJOsToDTOs(List<SensorMeasurement>)
+}
+class elfak.masterrad.queryservice.mqtt.listeners.SensorMeasurementCreatedListener {
+- Logger log
+- SensorService sensorService
+- String mosquittoHost
+- String mosquittoPort
+- String mosquittoTopic
+- {static} String publisherId
+- void initializeSubscriber()
+- String returnConnectionString(String,String)
+}
+interface elfak.masterrad.queryservice.services.SensorService {
+~ SensorMeasurementDTO storeMeasurement(SensorMeasurementDTO)
+~ SensorMeasurementDTO readLatestSensorMeasurement()
+~ List<SensorMeasurementDTO> readSensorMeasurementsInBetweenDates(Instant,Instant)
+~ List<SensorMeasurementDTO> readSensorMeasurementsInTheLastMinutes(Long)
+~ List<SensorMeasurementDTO> readSensorMeasurementOverLightIntensityThreshold(Double)
+}
+
+
+java.io.Serializable <|.. elfak.masterrad.queryservice.models.dto.SensorMeasurementDTO
+org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer <|.. elfak.masterrad.queryservice.config.WebSocketConfig
+elfak.masterrad.queryservice.services.SensorService <|.. elfak.masterrad.queryservice.services.impl.SensorServiceImpl
+elfak.masterrad.queryservice.services.SensorService -- elfak.masterrad.queryservice.controllers.SensorController
+elfak.masterrad.queryservice.models.dto.SensorMeasurementDTO -- elfak.masterrad.queryservice.services.SensorService
+elfak.masterrad.queryservice.models.dto.SensorMeasurementDTO -- elfak.masterrad.queryservice.controllers.SensorController
+elfak.masterrad.queryservice.models.dto.SensorMeasurementDTO -- elfak.masterrad.queryservice.mqtt.listeners.SensorMeasurementCreatedListener
+elfak.masterrad.queryservice.mqtt.listeners.SensorMeasurementCreatedListener -- elfak.masterrad.queryservice.services.SensorService
+elfak.masterrad.queryservice.models.SensorMeasurement -- elfak.masterrad.queryservice.services.SensorService
+@enduml

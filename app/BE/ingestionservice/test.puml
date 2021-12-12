@@ -1,0 +1,73 @@
+@startuml
+class elfak.masterrad.ingestionservice.IngestionserviceApplication {
+~ Logger logger
+- String host
+- String username
+- String password
++ {static} void main(String[])
+- void createDbs()
+}
+class elfak.masterrad.ingestionservice.models.dto.SensorMeasurementDTO {
+- String requestId
+- Double lightIntensity
+- Double groundMoisture
+- Double windIntensity
+- Double soilHumidity
++ String getRequestId()
++ void setRequestId(String)
++ Double getLightIntensity()
++ void setLightIntensity(Double)
++ Double getGroundMoisture()
++ void setGroundMoisture(Double)
++ Double getWindIntensity()
++ void setWindIntensity(Double)
++ Double getSoilHumidity()
++ void setSoilHumidity(Double)
++ String toString()
+}
+class elfak.masterrad.ingestionservice.mosquitto.listeners.SensorMeasurementCreatedListener {
+- Logger log
+- SensorService sensorService
+- String mosquittoHost
+- String mosquittoPort
+- String mosquittoTopic
+- {static} String publisherId
+- void initializeSubscriber()
+- String returnConnectionString(String,String)
+}
+interface elfak.masterrad.ingestionservice.services.SensorService {
+~ SensorMeasurementDTO storeMeasurement(SensorMeasurementDTO)
+}
+class elfak.masterrad.ingestionservice.models.SensorMeasurement {
+- Instant time
+- Double lightIntensity
+- Double groundMoisture
+- Double windIntensity
+- Double soilHumidity
++ Instant getTime()
++ void setTime(Instant)
++ Double getLightIntensity()
++ void setLightIntensity(Double)
++ Double getGroundMoisture()
++ void setGroundMoisture(Double)
++ Double getWindIntensity()
++ void setWindIntensity(Double)
++ Double getSoilHumidity()
++ void setSoilHumidity(Double)
++ String toString()
+}
+class elfak.masterrad.ingestionservice.services.impl.SensorServiceImpl {
+- String host
+- String username
+- String password
+- Logger logger
++ SensorMeasurementDTO storeMeasurement(SensorMeasurementDTO)
+}
+
+
+java.io.Serializable <|.. elfak.masterrad.ingestionservice.models.dto.SensorMeasurementDTO
+elfak.masterrad.ingestionservice.services.SensorService <|.. elfak.masterrad.ingestionservice.services.impl.SensorServiceImpl
+elfak.masterrad.ingestionservice.models.dto.SensorMeasurementDTO -- elfak.masterrad.ingestionservice.mosquitto.listeners.SensorMeasurementCreatedListener
+elfak.masterrad.ingestionservice.models.SensorMeasurement -- elfak.masterrad.ingestionservice.services.impl.SensorServiceImpl
+elfak.masterrad.ingestionservice.services.impl.SensorServiceImpl -- elfak.masterrad.ingestionservice.models.dto.SensorMeasurementDTO
+@enduml

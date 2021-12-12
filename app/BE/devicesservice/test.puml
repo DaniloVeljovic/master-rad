@@ -1,0 +1,118 @@
+@startuml
+class elfak.masterrad.devicesservice.services.impl.ActuationServiceImpl {
+- ActuationRepository actuationRepository
+- ActuationMessagePublisher publisher
+- Mapper mapper
+- Logger logger
++ Actuation saveActuation(Actuation)
++ Actuation getActuationById(Integer)
++ List<Actuation> getActuationsInStatusAndBeforeDate(ActuationStatus,Date)
++ void sendActuationToDevice(Actuation)
+}
+class elfak.masterrad.devicesservice.models.dtos.ActuationDTO {
+- Date activationDate
+- Long length
+- String pinToActivate
++ Date getActivationDate()
++ void setActivationDate(Date)
++ Long getLength()
++ void setLength(Long)
++ String getPinToActivate()
++ void setPinToActivate(String)
++ String toString()
+}
+interface elfak.masterrad.devicesservice.repositories.ActuationRepository {
+~ List<Actuation> findByStatusAndDateBefore(ActuationStatus,Date)
+}
+class elfak.masterrad.devicesservice.kafka.listeners.ActuationMessageListener {
+- Logger logger
+- ActuationService actuationService
+- Mapper mapper
++ void messageListener(ActuationMessage)
+}
+interface elfak.masterrad.devicesservice.services.ActuationService {
+~ Actuation saveActuation(Actuation)
+~ Actuation getActuationById(Integer)
+~ List<Actuation> getActuationsInStatusAndBeforeDate(ActuationStatus,Date)
+~ void sendActuationToDevice(Actuation)
+}
+class elfak.masterrad.devicesservice.controllers.ActuationController {
+- ActuationService actuationService
+- Mapper mapper
++ ResponseEntity<Actuation> createActuation(ActuationDTO)
++ ResponseEntity<Actuation> getActuation(Integer)
+}
+class elfak.masterrad.devicesservice.models.entities.Actuation {
+- Integer id
+- Date activationDate
+- Long length
+- String pinToActivate
+- ActuationStatus status
+- String deviceId
++ Integer getId()
++ void setId(Integer)
++ Date getActivationDate()
++ void setActivationDate(Date)
++ Long getLength()
++ void setLength(Long)
++ String getPinToActivate()
++ void setPinToActivate(String)
++ ActuationStatus getStatus()
++ void setStatus(ActuationStatus)
++ String getDeviceId()
++ void setDeviceId(String)
++ String toString()
+}
+class elfak.masterrad.devicesservice.mapper.Mapper {
++ ActuationMessage mapDomainObjectToActuationMessage(Actuation)
++ Actuation mapDTOToDomainObject(ActuationDTO)
++ Actuation mapMessageToEntity(ActuationMessage)
+}
+class elfak.masterrad.analyticsservice.kafka.models.ActuationMessage {
+- Date activationDate
+- Long length
+- String pinToActivate
+- String deviceId
++ Date getActivationDate()
++ void setActivationDate(Date)
++ Long getLength()
++ void setLength(Long)
++ String getPinToActivate()
++ void setPinToActivate(String)
++ String getDeviceId()
++ void setDeviceId(String)
++ String toString()
+}
+class elfak.masterrad.devicesservice.jobs.SendActuationToDeviceJob {
+- Logger logger
+- ActuationService actuationService
+~ SimpMessagingTemplate template
++ void execute()
+}
+class elfak.masterrad.devicesservice.kafka.producers.ActuationMessagePublisher {
+- {static} Logger logger
+- KafkaTemplate<String,Actuation> actuationKafkaTemplate
+- String actuationTopic
++ void publishMessage(Actuation)
+}
+class elfak.masterrad.devicesservice.kafka.listeners.DeviceActuationFinishedListener {
+- Logger logger
+- ActuationService actuationService
+- Mapper mapper
++ void messageListener(Actuation)
+}
+elfak.masterrad.devicesservice.services.ActuationService <|.. elfak.masterrad.devicesservice.services.impl.ActuationServiceImpl
+org.springframework.data.repository.CrudRepository <|-- elfak.masterrad.devicesservice.repositories.ActuationRepository
+elfak.masterrad.devicesservice.repositories.ActuationRepository -- elfak.masterrad.devicesservice.services.impl.ActuationServiceImpl
+elfak.masterrad.devicesservice.services.impl.ActuationServiceImpl -- elfak.masterrad.devicesservice.models.entities.Actuation
+elfak.masterrad.devicesservice.kafka.listeners.DeviceActuationFinishedListener -- elfak.masterrad.devicesservice.models.entities.Actuation
+elfak.masterrad.devicesservice.kafka.listeners.ActuationMessageListener -- elfak.masterrad.analyticsservice.kafka.models.ActuationMessage
+elfak.masterrad.devicesservice.kafka.producers.ActuationMessagePublisher -- elfak.masterrad.devicesservice.models.entities.Actuation
+elfak.masterrad.devicesservice.services.impl.ActuationService -- elfak.masterrad.devicesservice.jobs.SendActuationToDeviceJob
+elfak.masterrad.devicesservice.jobs.SendActuationToDeviceJob -- elfak.masterrad.devicesservice.models.entities.Actuation
+elfak.masterrad.devicesservice.models.entities.Actuation -- elfak.masterrad.devicesservice.controllers.ActuationController
+elfak.masterrad.devicesservice.models.dtos.ActuationDTO -- elfak.masterrad.devicesservice.controllers.ActuationController
+elfak.masterrad.devicesservice.mapper.Mapper -- elfak.masterrad.devicesservice.models.dtos.ActuationDTO
+elfak.masterrad.devicesservice.mapper.Mapper -- elfak.masterrad.analyticsservice.kafka.models.ActuationMessage
+elfak.masterrad.devicesservice.mapper.Mapper -- elfak.masterrad.devicesservice.models.Actuation
+@enduml

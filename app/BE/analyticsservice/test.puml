@@ -1,0 +1,153 @@
+@startuml
+class elfak.masterrad.analyticsservice.models.SensorMeasurement {
+- Instant time
+- Double lightIntensity
+- Double groundMoisture
+- Double windIntensity
+- Double soilHumidity
++ Instant getTime()
++ void setTime(Instant)
++ Double getLightIntensity()
++ void setLightIntensity(Double)
++ Double getGroundMoisture()
++ void setGroundMoisture(Double)
++ Double getWindIntensity()
++ void setWindIntensity(Double)
++ Double getSoilHumidity()
++ void setSoilHumidity(Double)
++ String toString()
+}
+class elfak.masterrad.analyticsservice.models.AnalyzedMeasurement {
+- Instant time
+- Double lightIntensity
+- Double groundMoisture
+- Double windIntensity
+- Double soilHumidity
+- String predictedClass
++ Instant getTime()
++ void setTime(Instant)
++ Double getLightIntensity()
++ void setLightIntensity(Double)
++ Double getGroundMoisture()
++ void setGroundMoisture(Double)
++ Double getWindIntensity()
++ void setWindIntensity(Double)
++ Double getSoilHumidity()
++ void setSoilHumidity(Double)
++ String getPredictedClass()
++ void setPredictedClass(String)
++ String toString()
+}
+interface elfak.masterrad.analyticsservice.services.SensorService {
+~ SensorMeasurementDTO createSensorMeasurement(SensorMeasurementDTO)
+~ Object analyzeMeasurement(SensorMeasurementDTO)
+~ void analyzeMeasurementAndActuateIfNeeded(SensorMeasurementDTO)
+~ void sendActuationMessage(Date,long,String,String)
+}
+class elfak.masterrad.analyticsservice.kafka.configs.KafkaTopicConfig {
+- String bootstrapAddress
+- String actuationTopic
++ KafkaAdmin kafkaAdmin()
++ NewTopic createTopic()
+}
+class elfak.masterrad.analyticsservice.mosquitto.listener.SensorMeasurementCreatedListener {
+- Logger log
+- SensorService sensorService
+- String mosquittoHost
+- String mosquittoPort
+- String mosquittoTopic
+- {static} String publisherId
+- void initializeSubscriber()
+- String returnConnectionString(String,String)
+}
+class elfak.masterrad.analyticsservice.kafka.configs.KafkaProducerConfig {
+- String bootstrapAddress
++ ProducerFactory<String,String> producerFactory()
++ KafkaTemplate<String,String> kafkaTemplate()
++ ProducerFactory<String,ActuationMessage> actuationMessageProducerFactory()
++ KafkaTemplate<String,ActuationMessage> actuationMessageKafkaTemplate()
+}
+class elfak.masterrad.analyticsservice.services.impl.SensorServiceImpl {
+- ActuationMessagePublisher publisher
+- String host
+- String username
+- String password
+- String modelPath
+- String datasetPath
+- {static} Classifier classifier
+- {static} Object shouldActuateIfPredicted
+- Logger logger
++ void trainOrAcquireModel()
++ SensorMeasurementDTO createSensorMeasurement(SensorMeasurementDTO)
++ Object analyzeMeasurement(SensorMeasurementDTO)
++ void analyzeMeasurementAndActuateIfNeeded(SensorMeasurementDTO)
++ void sendActuationMessage(Date,long,String,String)
+- Classifier loadModelFromFS(String)
+- Classifier createAndTrainModel(String)
+- void writeModelToFS(String,Classifier)
+}
+class elfak.masterrad.analyticsservice.kafka.publishers.ActuationMessagePublisher {
+- {static} Logger logger
+- KafkaTemplate<String,ActuationMessage> actuationMessageKafkaTemplate
+- String actuationTopic
++ void publishMessage(ActuationMessage)
+}
+class elfak.masterrad.analyticsservice.kafka.models.ActuationMessage {
+- Date activationDate
+- Long length
+- String pinToActivate
+- String deviceId
++ Date getActivationDate()
++ void setActivationDate(Date)
++ Long getLength()
++ void setLength(Long)
++ String getPinToActivate()
++ void setPinToActivate(String)
++ String getDeviceId()
++ void setDeviceId(String)
++ String toString()
+}
+class elfak.masterrad.analyticsservice.models.dto.SensorMeasurementDTO {
+- Double lightIntensity
+- Double groundMoisture
+- Double windIntensity
+- Double soilHumidity
++ Double getLightIntensity()
++ void setLightIntensity(Double)
++ Double getGroundMoisture()
++ void setGroundMoisture(Double)
++ Double getWindIntensity()
++ void setWindIntensity(Double)
++ Double getSoilHumidity()
++ void setSoilHumidity(Double)
++ String toString()
+}
+class elfak.masterrad.analyticsservice.models.dto.AnalyzedMeasurementDTO {
+- Double lightIntensity
+- Double groundMoisture
+- Double windIntensity
+- Double soilHumidity
+- String predictedClass
++ Double getLightIntensity()
++ void setLightIntensity(Double)
++ Double getGroundMoisture()
++ void setGroundMoisture(Double)
++ Double getWindIntensity()
++ void setWindIntensity(Double)
++ Double getSoilHumidity()
++ void setSoilHumidity(Double)
++ String getPredictedClass()
++ void setPredictedClass(String)
++ String toString()
+}
+
+
+elfak.masterrad.analyticsservice.services.SensorService <|.. elfak.masterrad.analyticsservice.services.impl.SensorServiceImpl
+java.io.Serializable <|.. elfak.masterrad.analyticsservice.models.dto.SensorMeasurementDTO
+elfak.masterrad.analyticsservice.models.dto.SensorMeasurementDTO -- elfak.masterrad.analyticsservice.services.impl.SensorServiceImpl
+elfak.masterrad.analyticsservice.models.SensorMeasurement -- elfak.masterrad.analyticsservice.services.impl.SensorServiceImpl
+elfak.masterrad.analyticsservice.mosquitto.listener.SensorMeasurementCreatedListener -- elfak.masterrad.analyticsservice.models.dto.SensorMeasurementDTO
+elfak.masterrad.analyticsservice.kafka.publishers.ActuationMessagePublisher -- elfak.masterrad.analyticsservice.services.impl.SensorServiceImpl
+elfak.masterrad.analyticsservice.kafka.publishers.ActuationMessagePublisher -- elfak.masterrad.analyticsservice.kafka.models.ActuationMessage
+elfak.masterrad.analyticsservice.models.AnalyzedMeasurement -- elfak.masterrad.analyticsservice.services.impl.SensorServiceImpl
+@enduml
