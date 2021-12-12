@@ -23,3 +23,14 @@ $\master-rad\app\FE\fe-app> npm install
 $\master-rad\app\FE\fe-app> npm start
 ```
 4. Run the _sensorImitation_ service
+
+## Clean up
+1. Stop the _sensorImitation_ service
+2. Stop the front end application (Ctrl+C in the terminal where it is running)
+3. Stop all the backend services
+4. Run 
+```
+$/docker> docker-compose down
+$/docker> docker rm -f $(docker ps -a -q)
+$/docker> docker volume rm $(docker volume ls -q)
+```
